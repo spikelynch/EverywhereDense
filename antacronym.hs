@@ -1,50 +1,21 @@
 -- 
 
-import Data.Char (ord, isLower, isUpper, toLower, isLetter)
+import Data.Char (ord, isLower, isUpper, toLower, isLetter, toUpper)
 import Data.List (intercalate)
 import System.Random (randomRIO)
+import EverywhereDense
 
-antlist :: Char -> [ String ]
-antlist 'a' = [ "a", "an", "anyone", "anvil", "acronym", "ask", "arcane" ]
-antlist 'b' = [ "by", "beg", "black", "but", "burden", "be", "bunyip" ]
-antlist 'c' = [ "could", "cyan", "cloud", "can't", "canyon", "cold" ]
-antlist 'd' = [ "don't", "do", "dig", "death", "did", "dense", "down" ]
-antlist 'e' = [ "everywhere", "even", "extreme", "either", "egg" ]
-antlist 'f' = [ "from", "for", "feather", "freezing", "felt" ]
-antlist 'g' = [ "go",  "good", "green", "grass", "get", "golden", "god" ]
-antlist 'h' = [ "have",  "heart", "help", "happy", "hard", "hey", "hot", "he", "his", "her" ]
-antlist 'i' = [ "I", "it", "is", "isn't",  "iron", "incomplete", "into", "intimate", "I'll", "in" ]
-antlist 'j' = [ "join", "joy",  "journey", "jail", "jump", "jazz" ]
-antlist 'k' = [ "knit", "keepsake",  "know", "knife", "kept" ]
-antlist 'l' = [ "let",  "length", "love", "learn", "lead", "lay" ]
-antlist 'm' = [ "my", "me",  "marry", "mauve", "more", "melt", "maybe", "man"  ]
-antlist 'n' = [ "no", "not",  "next", "need", "naked", "network" ]
-antlist 'o' = [ "oh",   "ordinary", "other", "on", "out", "of", "off"  ]
-antlist 'p' = [ "pink",  "pass", "put", "package", "purpose", "paid" ]
-antlist 'q' = [ "quiet", "queen", "queue", "quiz", "quite", "quake", "quaint" ]
-antlist 'r' = [  "random", "red", "related", "rode", "rot", "round"  ]
-antlist 's' = [  "she", "sex", "sure", "sent", "sudden", "silver", "sigh", "sort"  ]
-antlist 't' = [  "to", "the", "tale", "tall", "take", "toward", "tongue"  ]
-antlist 'u' = [  "under", "up", "until", "upset", "unless"  ]
-antlist 'v' = [ "version", "vow", "view", "vision", "vary", "verb" ]
-antlist 'w' = [ "woman", "wild", "when", "were", "wizened", "we", "won't"  ]
-antlist 'x' = [  "x-ray", "X-Men", "x-rated", "XXXX", "xenon"  ]
-antlist 'y' = [ "yes", "yesterday", "year", "yet", "your", "you", "yearn" ]
-antlist 'z' = [ "zither", "zebra", "zoo", "zip", "zoom" ]
-antlist _   = []
+
+antlist = geometry_a
+
 
 antlist_i :: Char -> [ String ]
 antlist_i c = case isUpper c of
                True -> antlist $ toLower c
                False -> antlist c
 
-
-randrange :: [ a ] -> IO Int
-randrange list = randomRIO (0, (length list) -1)
-
-
-randant :: Char -> IO String
-randant c = do
+expchar :: Char -> IO String
+expchar c = do
   words <- return (antlist_i c)
   case null words of
     True -> return ("" :: String )
@@ -52,24 +23,81 @@ randant c = do
               n <- randrange words
               return $ words !! n
 
+randrange :: [ a ] -> IO Int
+randrange list = randomRIO (0, (length list) -1)
 
-initStr = "everywhere dense" :: String
-iters = 3 :: Int
+
+expWord :: String -> IO [ String ]
+expWord= mapM expchar 
+
+expSentence :: [ String ] -> IO [ [ String ] ]
+expSentence = mapM expWord
+
+expParagraph :: [ [ String ] ] -> IO [ [ [ String ] ] ]
+expParagraph = mapM expSentence
+
+expChapter :: [ [ [ String ] ] ] -> IO [ [ [ [ String ] ] ] ]
+expChapter = mapM expParagraph
+
+expSection :: [ [ [ [ String ] ] ] ] -> IO [ [ [ [ [ String ] ] ] ] ]
+expSection = mapM expChapter
 
 
-explode :: Int -> String -> IO [ String ]
-explode n s = do
-  words <- mapM randant s
-  case n of
-    0 -> return words
-    otherwise -> explode (n - 1) (intercalate "" words)
+laySentence :: [ String ] -> String
+laySentence sentence = (intercalate " " words) ++ "."
+    where words = capfirst $ filter ( not . null ) sentence
+          
+capitalise [] = []
+capitalise (c:cs) = (toUpper c):cs 
 
-formatwords :: [ String ] -> String
-formatwords =  intercalate " " 
+capfirst [] = []
+capfirst (w:ws) = (capitalise w):ws
+
+layParagraph :: [ [ String ] ] -> String
+layParagraph paragraph = (intercalate " " sentences) ++ "\n\n"
+    where sentences = map laySentence paragraph
+
+layChapter :: [ [ [ String ] ] ] -> String
+layChapter chapter = (heading '-' header) ++ "\n\n" ++ (concat body) ++ "\n\n"
+    where (header, ps) = chapterHeader chapter 
+          body = map layParagraph ps
+
+chapterHeader ((s:ss):ps) = (s, ss:ps)
+chapterHeader _           = ([], [])
+
+
+laySection :: [ [ [ [ String ] ] ] ] -> String
+laySection section = (heading '=' header) ++ "\n\n" ++ (concat body)
+    where (header, cs) = sectionHeader section
+          body = map layChapter cs
+       
+
+sectionHeader (((s:ss):ps):cs) = (s, (ss:ps):cs)
+sectionHeader _                = ([], [])
+
+layNovel :: [ [ [ [ [ String ] ] ] ] ] -> String
+layNovel novel = concatMap laySection novel
+
+
+heading :: Char -> [ String ] -> String
+heading c s = (map toUpper sentence) ++ "\n" ++ (replicate (length sentence) c) ++ "\n"
+    where sentence = intercalate " " $ filter ( not . null ) s
+
+
+
+
+outputFile = "everywhere.dense.md" :: FilePath
+
+initStr = "Everywhere dense is a generated novel based on the principal of recursive acronym expansion. Every letter in the alphabet corresponds to a list of words and the initial text is expanded five times to create the text" :: String
+
 
 
 main :: IO ()
 main = do 
-  result <- explode iters initStr
-  putStrLn $ intercalate " " result
-  putStrLn $ show $ length result
+  sentence <- expWord initStr
+  paragraph <- expSentence sentence
+  chapter <- expParagraph paragraph
+  section <- expChapter chapter
+  novel <- expSection section
+  writeFile outputFile $ layNovel novel
+
