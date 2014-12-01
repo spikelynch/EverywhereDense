@@ -5,32 +5,32 @@ import Data.List (intercalate)
 import System.Random (randomRIO)
 
 antlist :: Char -> [ String ]
-antlist 'a' = [ "a", "an", "anyone", "anvil", "acronym", "ask", "arcane", "Anne" ]
-antlist 'b' = [ "by", "beg", "black", "Bob", "burden", "be", "bunyip" ]
-antlist 'c' = [ "could", "cyan", "cloud", "Cindy", "can't", "canyon" ]
-antlist 'd' = [ "don't", "do", "Dave", "dig", "death", "did", "dense" ]
-antlist 'e' = [ "everywhere", "even", "Elsa", "extreme", "either", "egg" ]
-antlist 'f' = [ "from", "Frank", "for", "feather", "freezing", "felt" ]
-antlist 'g' = [ "go", "Gillian", "good", "green", "grass", "get", "golden" ]
-antlist 'h' = [ "have", "Howard", "heart", "help", "happy", "hard", "hey" ]
-antlist 'i' = [ "I", "it", "is", "isn't", "Ivy", "iron", "incomplete", "into", "intimate", "I'll", "in" ]
-antlist 'j' = [ "join", "John", "journey", "jail", "jump", "jazz" ]
-antlist 'k' = [ "knit", "keepsake", "Kathy", "know", "knife", "kept" ]
-antlist 'l' = [ "let", "Leo", "length", "love", "learn", "lead", "lay" ]
-antlist 'm' = [ "my", "me", "Mary", "marry", "mauve", "more", "melt", "maybe", "man"  ]
-antlist 'n' = [ "no", "not", "Ned", "next", "need", "naked", "network" ]
-antlist 'o' = [ "oh", "Olive", "olive", "ordinary", "other", "on", "out", "of", "off"  ]
-antlist 'p' = [ "pink", "Peter", "pass", "put", "package", "purpose", "paid" ]
+antlist 'a' = [ "a", "an", "anyone", "anvil", "acronym", "ask", "arcane" ]
+antlist 'b' = [ "by", "beg", "black", "but", "burden", "be", "bunyip" ]
+antlist 'c' = [ "could", "cyan", "cloud", "can't", "canyon", "cold" ]
+antlist 'd' = [ "don't", "do", "dig", "death", "did", "dense", "down" ]
+antlist 'e' = [ "everywhere", "even", "extreme", "either", "egg" ]
+antlist 'f' = [ "from", "for", "feather", "freezing", "felt" ]
+antlist 'g' = [ "go",  "good", "green", "grass", "get", "golden", "god" ]
+antlist 'h' = [ "have",  "heart", "help", "happy", "hard", "hey", "hot", "he", "his", "her" ]
+antlist 'i' = [ "I", "it", "is", "isn't",  "iron", "incomplete", "into", "intimate", "I'll", "in" ]
+antlist 'j' = [ "join", "joy",  "journey", "jail", "jump", "jazz" ]
+antlist 'k' = [ "knit", "keepsake",  "know", "knife", "kept" ]
+antlist 'l' = [ "let",  "length", "love", "learn", "lead", "lay" ]
+antlist 'm' = [ "my", "me",  "marry", "mauve", "more", "melt", "maybe", "man"  ]
+antlist 'n' = [ "no", "not",  "next", "need", "naked", "network" ]
+antlist 'o' = [ "oh",   "ordinary", "other", "on", "out", "of", "off"  ]
+antlist 'p' = [ "pink",  "pass", "put", "package", "purpose", "paid" ]
 antlist 'q' = [ "quiet", "queen", "queue", "quiz", "quite", "quake", "quaint" ]
-antlist 'r' = [ "Ron", "random", "red", "related", "rode", "rot", "round"  ]
-antlist 's' = [ "Susan", "sex", "sure", "sent", "sudden", "silver", "sigh", "sort"  ]
-antlist 't' = [ "Tom", "to", "the", "tale", "tall", "take", "toward", "tongue"  ]
-antlist 'u' = [ "Ursula", "under", "up", "until", "upset", "unless"  ]
-antlist 'v' = [ "Vern", "version", "vow", "view", "vision", "vary", "verb" ]
-antlist 'w' = [ "woman", "wild", "Wilhelmina", "wizened", "we", "won't"  ]
-antlist 'x' = [ "Xavier", "x-ray", "X-Men"  ]
-antlist 'y' = [ "yes", "yesterday", "Yan", "yet", "your", "you", "yearn" ]
-antlist 'z' = [ "Zack", "zither", "zebra", "zoo", "zip", "zoom" ]
+antlist 'r' = [  "random", "red", "related", "rode", "rot", "round"  ]
+antlist 's' = [  "she", "sex", "sure", "sent", "sudden", "silver", "sigh", "sort"  ]
+antlist 't' = [  "to", "the", "tale", "tall", "take", "toward", "tongue"  ]
+antlist 'u' = [  "under", "up", "until", "upset", "unless"  ]
+antlist 'v' = [ "version", "vow", "view", "vision", "vary", "verb" ]
+antlist 'w' = [ "woman", "wild", "when", "were", "wizened", "we", "won't"  ]
+antlist 'x' = [  "x-ray", "X-Men", "x-rated", "XXXX", "xenon"  ]
+antlist 'y' = [ "yes", "yesterday", "year", "yet", "your", "you", "yearn" ]
+antlist 'z' = [ "zither", "zebra", "zoo", "zip", "zoom" ]
 antlist _   = []
 
 antlist_i :: Char -> [ String ]
@@ -54,20 +54,15 @@ randant c = do
 
 
 initStr = "everywhere dense" :: String
-
-antacronym :: String -> IO String
-antacronym s = do
-  words <- mapM randant s
-  return $ formatwords (filter (not . null ) words)
+iters = 3 :: Int
 
 
-explode :: Int -> String -> IO String
+explode :: Int -> String -> IO [ String ]
 explode n s = do
+  words <- mapM randant s
   case n of
-    0 -> return s
-    otherwise -> do
-                exploded <- antacronym s
-                explode (n - 1) exploded
+    0 -> return words
+    otherwise -> explode (n - 1) (intercalate "" words)
 
 formatwords :: [ String ] -> String
 formatwords =  intercalate " " 
@@ -75,17 +70,6 @@ formatwords =  intercalate " "
 
 main :: IO ()
 main = do 
-  input <- getLine
-  result <- explode 6 input
-  putStrLn result
+  result <- explode iters initStr
+  putStrLn $ intercalate " " result
   putStrLn $ show $ length result
-
-
-
-  -- r1 <- antacronym initStr
-  -- r2 <- antacronym r1
-  -- r3 <- antacronym r2
-  -- r4 <- antacronym r3
-  -- r5 <- antacronym r4
-  -- r6 <- antacronym r5
-  -- r7 <- antacronym r6
