@@ -88,7 +88,7 @@ heading c s = (map toUpper sentence) ++ "\n" ++ (replicate (length sentence) c) 
 
 outputFile = "everywhere.dense.md" :: FilePath
 
-initStr = "Everywhere dense is a generated novel based on the principal of recursive acronym expansion. Every letter in the alphabet corresponds to a list of words and the initial text is expanded five times to create the text" :: String
+initStr = "Everywhere dense is a generated novel based on the principal of recursive acronym expansion." :: String
 
 
 
@@ -100,4 +100,3 @@ main = do
   section <- expChapter chapter
   novel <- expSection section
   writeFile outputFile $ layNovel novel
-
