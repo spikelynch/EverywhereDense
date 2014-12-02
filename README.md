@@ -13,3 +13,5 @@ This procedure is repeated five times to give the text's structure
 The words are chosen randomly from a list of words which are loosely
 themed on the principles used to generate the text, and also chosen so
 that all letters in the alphabet get recycled.
+
+One possible version of [Everywhere Dense](https://github.com/spikelynch/EverywhereDense/blob/master/everywhere.dense.pdf?raw=true)
